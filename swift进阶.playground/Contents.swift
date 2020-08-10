@@ -636,3 +636,10 @@ do {
  /*
  public func flatMap<ElementOfResult>(_ transform: (Element) throws -> ElementOfResult?) rethrows -> [ElementOfResult]
  */
+
+var map: [String: Int] = [:]
+map["a"] = 1
+map["b"] = 2
+map["a"] = 3
+map
+
