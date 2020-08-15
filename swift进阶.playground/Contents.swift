@@ -1,4 +1,5 @@
 import UIKit
+import Foundation
 
 var str = "Hello, playground"
 
@@ -643,3 +644,340 @@ map["b"] = 2
 map["a"] = 3
 map
 
+let sn = ["1", "2", "3", "foo"]
+let y = sn.first
+y
+debugPrint(y)
+let x = y.map { Int($0) }
+debugPrint(x)
+let z = y.flatMap { Int($0) }
+debugPrint(z)
+
+
+func transform(value: String?) {
+    debugPrint("transform")
+}
+
+let s = "s"
+transform(value: .some(s))
+transform(value: s)
+
+/*
+func uniqueIntegerProvider() -> () -> Int {
+    var i = 0
+    return {
+        i += 1
+        return i
+    }
+}
+
+let f = uniqueIntegerProvider()
+let a = f()
+let b = f()
+
+let f1 = uniqueIntegerProvider()
+let a1 = f1()
+let b1 = f1()
+*/
+
+
+func uniqueIntegerProvider() -> AnyIterator<Int> {
+    var i = 0
+    return AnyIterator {
+        i += 1
+        return i }
+}
+
+let ai = uniqueIntegerProvider()
+ai.next()
+ai.next()
+
+
+
+/*
+struct City: Codable {
+    var name = ""
+    var park: Park?
+}
+*/
+
+/*
+let p = Park(name: "华新公园", address: "华新镇华富路555号")
+let encoder = JSONEncoder()
+
+let data = try? encoder.encode(p)
+
+let de = JSONDecoder()
+if let d = data {
+    let p = try? de.decode(Park.self, from: d)
+    
+//    JSONSerialization.jsonObject(with: d)
+}
+*/
+
+
+
+// 单层级正常解析
+/*
+let json = "{\"name\":\"中通快递\",\"address\":\"华新镇\"}"
+do {
+    let d = json.data(using: .utf8)
+    let decoder = JSONDecoder()
+    let p = try decoder.decode(Park.self, from: d!)
+} catch  {
+    debugPrint("解析错误")
+}
+*/
+
+
+// 数组解析
+
+/*
+let json = "[{\"name\":\"中通快递\",\"address\":\"华新镇\"},{\"name\":\"申通快递\",\"address\":\"凤溪镇\"}]"
+do {
+    let d = json.data(using: .utf8)
+    let decoder = JSONDecoder()
+    let p = try decoder.decode([Park].self, from: d!)
+    debugPrint("p: \(p)")
+} catch  {
+    debugPrint("解析错误")
+}
+*/
+
+/*
+struct Park: Codable {
+    var name = ""
+    var address = ""
+}
+
+struct City: Codable {
+    var name = ""
+    var park: Park?
+}
+
+// 嵌套解析
+let json = "{\"name\":\"上海\",\"park\":{\"name\":\"申通快递\",\"address\":\"凤溪镇\"}}"
+do {
+    let d = json.data(using: .utf8)
+    let decoder = JSONDecoder()
+    let p = try decoder.decode(City.self, from: d!)
+    debugPrint("p: \(p)")
+} catch  {
+    debugPrint("解析错误")
+}
+*/
+
+
+// 重命名字段 和 部分解析
+/*
+struct Person: Codable {
+    var name = ""
+    var age: Int?
+    
+    enum CodingKeys: String, CodingKey {
+        // 把json中的label字段解析成Person结构体中的name
+        case name = "label"
+        // 没有列举出来的字段不解析
+//        case age
+    }
+}
+
+let json = "{\"label\":\"小明\",\"age\":13}"
+do {
+    let d = json.data(using: .utf8)
+    let decoder = JSONDecoder()
+    let p = try decoder.decode(Person.self, from: d!)
+    debugPrint("p: \(p)")
+} catch  {
+    debugPrint("解析错误")
+}
+*/
+
+
+
+// 某个字段解析错误，如果不处理，整个解析都失败，可通过重写encode(to:) 和 init(from:) 方法实现
+struct Person: Codable {
+    var name = ""
+    var age: Int?
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.name = try container.decode(String.self, forKey: .name)
+        do{
+//            self.coordinate = try container.decodeIfPresent(Coordinate.self, forKey: .coordinate)
+            self.age = try container.decode(Int.self, forKey: .age)
+        } catch {
+            debugPrint("self.age decode")
+            self.age = 0
+        }
+    }
+}
+
+let json = "{\"name\":\"小明\",\"age\":{}}"
+do {
+    let d = json.data(using: .utf8)
+    let decoder = JSONDecoder()
+    let p = try decoder.decode(Person.self, from: d!)
+    debugPrint("p: \(p)")
+} catch  {
+    debugPrint("解析错误")
+}
+
+//let sortByYear: (Int) -> Bool = { num in return num / 2 == 0 }
+let sortByYear: (Int) -> Bool = { $0 / 2 == 0}
+let rs = sortByYear(4)
+
+func increment(value: inout Int) {
+    value += 1
+}
+var i = 0
+increment(value: &i)
+i
+
+
+/*
+struct P: TextP {
+    typealias Element = Int
+    
+    func log() {
+        debugPrint("log")
+    }
+}
+// 含有 Self 或 关联类型 的协议不能作为独立类型
+let p = P()
+
+//func f(_: TextP) {
+//
+//}
+*/
+
+
+/*
+class P<T: TextP> where T.Element == Int {
+    func log() {
+        debugPrint("log")
+    }
+}
+
+class P1<T> where T: TextP, T.Element == Int {
+    func log() {
+        debugPrint("log")
+    }
+}
+*/
+
+
+//let p: P = P<<#T: TextP#>>()
+
+
+
+
+/*
+class IteratorStore<I: IteratorProtocol> where I.Element == Int {
+    
+    var iterator: I
+    
+    init(iterator: I){
+        self.iterator = iterator
+    }
+}
+
+class Iterator1: IteratorProtocol {
+    func next() -> Int? {
+        return 1
+    }
+}
+
+class Iterator2: IteratorProtocol {
+    func next() -> Int? {
+        return 2
+    }
+}
+
+let i1 = Iterator1()
+let i2 = Iterator2()
+
+let s1 = IteratorStore.init(iterator: i1)
+let s2 = IteratorStore.init(iterator: i2)
+*/
+
+// 报错 IteratorProtocol 不能作为独立的类型
+//let iArray: [IteratorProtocol] = [i1, i2]
+
+//let sArray: [IteratorStore<Iterator1>] = [s1, s2]
+
+
+public protocol TextP {
+    associatedtype Element
+    func log()
+}
+
+struct T1: TextP {
+    typealias Element = Int
+    
+    func log() {
+        debugPrint("T1 log")
+    }
+}
+
+struct T2: TextP {
+    typealias Element = Int
+    
+    func log() {
+        debugPrint("T2 log")
+    }
+}
+let t1 = T1()
+let t2 = T2()
+
+//let ts = [t1, T2]
+
+/*
+struct TextPBox: TextP{
+    typealias Element = Int
+    
+    var tbLog: (() -> Void)?
+    
+    init<T: TextP>(item: T) {
+        self.tbLog = {item.log()}
+    }
+    
+    func log() {
+        self.tbLog?()
+    }
+}
+
+
+let tb1 = TextPBox.init(item: t1)
+let tb2 = TextPBox.init(item: t2)
+let tbs = [tb1, tb2]
+tb1.tbLog?()
+tb2.tbLog?()
+
+tb1.log()
+tb2.log()
+*/
+
+
+class TextPBox<Element>: TextP {
+    func log() {
+        fatalError("抽象类，需要子类来实现")
+    }
+}
+
+
+class TextPBoxHelper<T: TextP>: TextPBox<Int> {
+    var item: T
+    init(item: T) {
+        self.item = item
+    }
+    override func log() {
+        item.log()
+    }
+}
+
+let tbh1 = TextPBoxHelper.init(item: t1)
+let tbh2 = TextPBoxHelper.init(item: t2)
+tbh1.log()
+tbh2.log()
+let tbhs = [tbh1, tbh2]
