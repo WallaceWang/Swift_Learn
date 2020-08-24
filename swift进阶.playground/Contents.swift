@@ -981,3 +981,10 @@ let tbh2 = TextPBoxHelper.init(item: t2)
 tbh1.log()
 tbh2.log()
 let tbhs = [tbh1, tbh2]
+
+while true {
+    let runloop = RunLoop.current
+    runloop.run(mode: .default, before: Date.distantFuture)
+    debugPrint("haha")
+}
+
